@@ -62,7 +62,7 @@ export default function Home() {
       <button onClick={createNew}>ADD NEW</button>
       {categories.map((category)=>(
           <div key={category.id}>{category.name} <button onClick={() => update(category.name, category.id)}> EDIT</button> 
-          <button disabled={loading}  onClick={() => del(category.id)}> DELETE</button>
+          <button disabled={loading}  onClick={() => del(category.id)}> DELETED</button>
           </div>
       ))} 
     </main>
