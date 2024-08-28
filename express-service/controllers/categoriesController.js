@@ -1,38 +1,37 @@
-const { getCategories, updateCategory, createNewCategory, deleteCategory } = require("../services/categoryService");
+const { getCategories, updateCategory, createNewCategory, deleteCategory, getOneCategory } = require("../services/categoryService");
 
-function categoriesListAll (req,res) {
-    const categories = getCategories();  
+async function categoriesListAll (req,res) {
+    const categories = await getCategories();  
     res.json(categories)
   };
 
-function categoriesListOne (req,res) {
-    const { id } = req.params;
-    const one = getOneCategory(id)
+async function categoriesListOne (req,res) {
+    const { id } = await req.params;
+    const one = await getOneCategory(id)
+    if (!one) {
+      res.status(404).json({ message: "NOT FOUND" })
+      return;
+    }
     res.json(one);
   };
   
-function categoriesUpdate (req,res) {
+async function categoriesUpdate (req,res) {
     const { id } = req.params; 
-    const { name } = req.body;
-    updateCategory ({id, name}); 
+    const input = req.body;
+    await updateCategory (id, input); 
     res.sendStatus(204);
 };
 
-function categoriesCreate (req,res) {
+async function categoriesCreate (req,res) {
     const { name } = req.body;
-    const categories = getCategories();
-    const id = createNewCategory({name});
+    const categories = await getCategories();
+    const id = await createNewCategory({name});
     res.status(201).json ({ id });
 };
-function categoriesDelete (req, res) {
+
+async function categoriesDelete (req, res) {
     const { id } = req.params;
-    const categories = getCategories();
-    const deleteIndex = categories.findIndex ((cat) => cat.id === id);
-    if (deleteIndex < 0 ) {
-      res.sendStatus(404);
-      return;
-    }
-    deleteCategory(id);
+    await deleteCategory(id);
     res.sendStatus(204);
 }
 

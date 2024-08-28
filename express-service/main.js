@@ -1,8 +1,4 @@
-const fs = require(`fs`);
-const { v4: uuidv4 } = require('uuid');
 const { startApp } = require ("./configs/basic");
-const { sql } = require("./configs/database");
-const {createNewCategory, getCategories, getOneCategory, updateCategory, deleteCategory } = require('./services/categoryService');
 const { categoriesListAll, categoriesListOne, categoriesUpdate, categoriesCreate, categoriesDelete } = require('./controllers/categoriesController');
 const app = startApp(); 
 app.get ("/categories", categoriesListAll);

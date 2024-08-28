@@ -1,40 +1,35 @@
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const { sql } = require('../configs/database');
 
 const content = fs.readFileSync("data/categories.json", "utf-8");
 
- function getCategories () {
-    const content = fs.readFileSync("data/categories.json", "utf-8");
-    const categories = JSON.parse(content);   
-    return categories;
+ async function getCategories () {
+    const list = await sql `select * from category`;
+    return list;
 };
 
 let categories = getCategories();
 
 async function getOneCategory(id) {
-
-  const category = categories.find(cat.id === id);
+  const list = await sql `select * from category where id = ${id}`;
+  if (list.length) {
+    return list[0];
+  }
+  return null;
 };
 
-async function updateCategory({id, name}) {
-
-  const index = categories.findIndex((cat) => cat.id === id); 
-  categories[index].name = name; 
-  fs.writeFileSync("data/categories.json", JSON.stringify(categories));
+async function updateCategory(id, update) {
+  await sql`update category set name = ${update.name} where id = ${id}`;
 };
 
 async function deleteCategory(id) {
-
-  categories = categories.filter((cat) => cat.id !== id);
-  fs.writeFileSync("data/categories.json", JSON.stringify(categories));
+  await sql `delete from category where id = ${id}`;
 };
 
-async function createNewCategory (form) {
+async function createNewCategory ({name}) {
   const id = uuidv4();
-  form.id = id;
-
-  categories.push(form); 
-  fs.writeFileSync("data/categories.json", JSON.stringify(categories));
+  await sql`insert into category(id, name) values (${id}, ${name})`;
   return id; 
 };
 
