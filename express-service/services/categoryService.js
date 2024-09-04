@@ -25,7 +25,7 @@ async function deleteCategory(id) {
   await sql`delete from category where id = ${id}`;
 };
 
-async function createNewCategory({ name='name', icon='icon', color='color'}) {
+async function createNewCategory({ name, icon, color}) {
   const id = uuidv4();
   await sql`insert into category(id, name, icon, color) values (${id}, ${name}, ${icon}, ${color})`;
   return id;

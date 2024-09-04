@@ -23,9 +23,9 @@ async function categoriesUpdate(req, res) {
 };
 
 async function categoriesCreate(req, res) {
-  const { name } = req.body;
+  const { name, icon, color } = req.body;
   const categories = await getCategories();
-  const id = await createNewCategory({ name });
+  const id = await createNewCategory({ name, icon, color });
   res.status(201).json({ id });
 };
 
