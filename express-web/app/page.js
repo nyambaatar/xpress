@@ -70,10 +70,9 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-
   const [icon, setIcon] = useState("");
   const [color, setColor] = useState("");
-
+  const [name, setName] = useState("");
 
 
   //LOADLIST
@@ -89,18 +88,18 @@ export default function Home() {
 
 
   //CREATE
-  async function createNew() {
-    const ner = prompt("Name..");
-    if (ner) {
-      const name = await fetch("http://localhost:4000/categories", {
+   async function createNew() {
+    setLoading(true); 
+    await fetch("http://localhost:4000/categories", {
         method: "POST",
-        body: JSON.stringify({ name: ner, color: color, }),
+        body: JSON.stringify({ name: name, color: color, icon: icon, }),
         headers: {
           "Content-type": "application/json;charset=UTF-8"
         }
       })
-      loadList()
-    }
+      loadList();
+      setLoading(false);
+      setOpen(false);
   }
   //DELETE
   async function handleDelete(id, name) {
@@ -128,7 +127,7 @@ export default function Home() {
   }
 
   //check
-  console.log({color})
+  console.log({color , icon, name})
 
   // RETURN
   return (
@@ -152,7 +151,7 @@ export default function Home() {
                 </PopoverTrigger>
                 <PopoverContent className="w-80 bg-blue-400 items-center content-center">
                   <div className="grid grid-cols-6">{categoryIcons.map(({name, Icon}) => (
-                <div key={name}>
+                <div key={name} onClick={()=> setIcon(name)} className= {`flex items-center justify-center py-2 ${icon===name ? 'bg-blue-200' : ''}`}>
                   <Icon/>
                 </div>
                 ))}
@@ -169,23 +168,40 @@ export default function Home() {
                 </PopoverContent>
               </Popover>
               <Input
-                id="name"
-                defaultValue="Pedro Duarte"
-                className="col-span-3"/>
+                disabled={loading} id="name" value = {name} onChange ={(e) => setName (e.target.value)}className="col-span-3"/>
             </div>
           </div>
           <DialogFooter>
-            <Button className="rounded-full w-full bg-green-600 hover:bg-green-800" onClick={createNew}></Button>
+            <Button disabled={loading} className="rounded-full w-full bg-green-600 hover:bg-green-800" onClick={createNew}></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {categories.map((category) => (
-        <div key={category.id}>{category.name}
+        <div key={category.name}>
+          <CategoryIcons iconName= {category.icon} color={category.color}/>
+          {category.name}
           <button onClick={() => update(category.name, category.id)}> EDIT</button>
           <button disabled={loading} onClick={() => handleDelete(category.id, category.name)}> DELETED</button>
         </div>
       ))}
     </main>
   )
+}
+
+function CategoryIcons({iconName, color}) {
+  const iconObject = categoryIcons.find ((item)=> item.name===iconName); 
+  const colorObject = categoryColors.find ((item)=> item.name === color)
+  if ( !iconObject) {
+    return null;
+  }
+  let hexColor
+  if (!colorObject) {
+    hexColor = "#000";
+  }
+  else {
+    hexColor = colorObject.value; 
+  }
+  const { Icon } = iconObject;
+  return <Icon style={{color: hexColor}}/>;
 }
