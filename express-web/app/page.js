@@ -3,82 +3,103 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { CircleDot, Clock, Fingerprint, House, Icon, IdCardIcon, Image, Joystick, Mic,} from "lucide-react";
+import {
+  CircleDot,
+  Clock,
+  Fingerprint,
+  House,
+  Icon,
+  IdCardIcon,
+  Image,
+  Joystick,
+  Mic,
+} from "lucide-react";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 // icons list
 const categoryIcons = [
-  { 
-    name: 'home',
+  {
+    name: "home",
     Icon: House,
   },
-  { 
-    name: 'fingerprint',
+  {
+    name: "fingerprint",
     Icon: Fingerprint,
   },
-  { 
-    name: 'image',
+  {
+    name: "image",
     Icon: Image,
   },
-  { 
-    name: 'card',
+  {
+    name: "card",
     Icon: IdCardIcon,
   },
-  { 
-    name: 'joystick',
+  {
+    name: "joystick",
     Icon: Joystick,
   },
-  { 
-    name: 'clock',
+  {
+    name: "clock",
     Icon: Clock,
   },
-
-]
-// color list 
+];
+// color list
 const categoryColors = [
   {
-    name: 'blue',
-    value: '#0166ff',
+    name: "blue",
+    value: "#0166ff",
   },
   {
-    name: 'Sky',
-    value: '#01b3ff',
+    name: "Sky",
+    value: "#01b3ff",
   },
   {
-    name: 'Lime',
-    value: '#41cc00',
+    name: "Lime",
+    value: "#41cc00",
   },
   {
-    name: 'Sun',
-    value: '#F9d100',
+    name: "Sun",
+    value: "#F9d100",
   },
   {
-    name: 'Orange',
-    value: '#FF7b01',
+    name: "Orange",
+    value: "#FF7b01",
   },
   {
-    name: 'Pink',
-    value: '#AE01ff',
+    name: "Pink",
+    value: "#AE01ff",
   },
-
-]
-
+];
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [icon, setIcon] = useState("");
-  const [color, setColor] = useState("");
+  const [icon, setIcon] = useState("home");
+  const [color, setColor] = useState("Pink");
   const [name, setName] = useState("");
-
+  const [editingCategory, setEditingCategory] = useState("");
 
   //LOADLIST
   async function loadList() {
-    const name = await fetch("http://localhost:4000/categories")
-    const data = await name.json()
+    const name = await fetch("http://localhost:4000/categories");
+    const data = await name.json();
 
     setCategories(data);
   }
@@ -86,122 +107,158 @@ export default function Home() {
     loadList();
   }, []);
 
-
   //CREATE
-   async function createNew() {
-    setLoading(true); 
+  async function createNew() {
+    setLoading(true);
     await fetch("http://localhost:4000/categories", {
-        method: "POST",
-        body: JSON.stringify({ name: name, color: color, icon: icon, }),
-        headers: {
-          "Content-type": "application/json;charset=UTF-8"
-        }
-      })
-      loadList();
-      setLoading(false);
-      setOpen(false);
+      method: "POST",
+      body: JSON.stringify({ name: name, color: color, icon: icon }),
+      headers: {
+        "Content-type": "application/json;charset=UTF-8",
+      },
+    });
+    loadList();
+    setLoading(false);
+    setOpen(false);
+    toast("Succes");
   }
   //DELETE
   async function handleDelete(id, name) {
     if (confirm(name)) {
-
-      setLoading(true)
+      setLoading(true);
       const responce = await fetch(`http://localhost:4000/categories/${id}`, {
         method: "DELETE",
-      })
+      });
       loadList();
     }
     setLoading(false);
   }
   //UPDATE
-  const update = async (oldName, id) => {
+  async function update(oldName, id) {
     const newName = prompt("end nere bicheere", oldName);
     const response = await fetch(`http://localhost:4000/categories/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ name: newName, }),
+      body: JSON.stringify({ name: newName, icon: icon, color: color }),
       headers: {
-        "Content-type": "application/json; charset=UTF-8"
+        "Content-type": "application/json; charset=UTF-8",
       },
-    })
+    });
     loadList();
   }
 
   //check
-  console.log({color , icon, name})
+  console.log({ editingCategory });
+
+  useEffect(() => {
+    if (editingCategory) {
+      setOpen(true);
+      setName(editingCategory.name);
+      setColor(editingCategory.color);
+      setIcon(editingCategory.icon);
+    }
+  }, [editingCategory]);
 
   // RETURN
   return (
     <main>
-      <Button variant="secondary" onClick={() => setOpen(true)}>Add Category</Button>
+      <Toaster />
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        Add Category
+      </Button>
       <Dialog open={open}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
-            </DialogDescription>
+            <DialogDescription> </DialogDescription>
           </DialogHeader>
           <div className="grid gap-5 py-4 rounded">
             <div className="grid grid-cols-4 items-center gap-4">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="secondary">
-                    <House/>
+                    <House />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 bg-blue-400 items-center content-center">
-                  <div className="grid grid-cols-6">{categoryIcons.map(({name, Icon}) => (
-                <div key={name} onClick={()=> setIcon(name)} className= {`flex items-center justify-center py-2 ${icon===name ? 'bg-blue-200' : ''}`}>
-                  <Icon/>
-                </div>
-                ))}
-                </div>
-                <div className="grid grid-cols-6"> {categoryColors.map (({name, value})=>(
-                  <div key={name} onClick={()=> setColor(name)}><div className="w-8 h-8 rounded-full text-white flex justify-center items-center" style={{backgroundColor: value}}>
-                    {
-                      color === name && <CircleDot className="w-4 h-4"/>
-                    }
-                    </div>
+                <PopoverContent className="w-80 items-center content-center">
+                  <div className="grid grid-cols-6">
+                    {categoryIcons.map(({ name, Icon }) => (
+                      <div
+                        key={name}
+                        onClick={() => setIcon(name)}
+                        className={`flex items-center justify-center py-2 ${
+                          icon === name ? "bg-blue-200" : ""
+                        }`}
+                      >
+                        <Icon />
+                      </div>
+                    ))}
                   </div>
-                ))}
-                </div>
+                  <div className="grid grid-cols-6">
+                    {" "}
+                    {categoryColors.map(({ name, value }) => (
+                      <div key={name} onClick={() => setColor(name)}>
+                        <div
+                          className="w-8 h-8 rounded-full text-white flex justify-center items-center"
+                          style={{ backgroundColor: value }}
+                        >
+                          {color === name && <CircleDot className="w-4 h-4" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </PopoverContent>
               </Popover>
               <Input
-                disabled={loading} id="name" value = {name} onChange ={(e) => setName (e.target.value)}className="col-span-3"/>
+                disabled={loading}
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="col-span-3"
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button disabled={loading} className="rounded-full w-full bg-green-600 hover:bg-green-800" onClick={createNew}></Button>
+            <Button
+              disabled={loading}
+              className="rounded-full w-full bg-green-600 hover:bg-green-800"
+              onClick={createNew}
+            ></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {categories.map((category) => (
-        <div key={category.name}>
-          <CategoryIcons iconName= {category.icon} color={category.color}/>
-          {category.name}
-          <button onClick={() => update(category.name, category.id)}> EDIT</button>
-          <button disabled={loading} onClick={() => handleDelete(category.id, category.name)}> DELETED</button>
+        <div className="flex items-center" key={category.id}>
+          <CategoryIcons iconName={category.icon} color={category.color} />
+          {category.name}{" "}
+          <Button onClick={(update) => setEditingCategory(category)}>
+            EDIT
+          </Button>
+          <Button
+            disabled={loading}
+            onClick={() => handleDelete(category.id, category.name)}
+          >
+            {" "}
+            DELETED
+          </Button>
         </div>
       ))}
     </main>
-  )
+  );
 }
 
-function CategoryIcons({iconName, color}) {
-  const iconObject = categoryIcons.find ((item)=> item.name===iconName); 
-  const colorObject = categoryColors.find ((item)=> item.name === color)
-  if ( !iconObject) {
+function CategoryIcons({ iconName, color }) {
+  const iconObject = categoryIcons.find((item) => item.name === iconName);
+  const colorObject = categoryColors.find((item) => item.name === color);
+  if (!iconObject) {
     return null;
   }
-  let hexColor
+  let hexColor;
   if (!colorObject) {
     hexColor = "#000";
-  }
-  else {
-    hexColor = colorObject.value; 
+  } else {
+    hexColor = colorObject.value;
   }
   const { Icon } = iconObject;
-  return <Icon style={{color: hexColor}}/>;
+  return <Icon style={{ color: hexColor }} />;
 }
